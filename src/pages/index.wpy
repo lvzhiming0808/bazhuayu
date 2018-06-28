@@ -1,0 +1,171 @@
+<style lang="less">
+  .octopusbox{
+    margin: 0rpx 50rpx 80rpx 50rpx;
+    .octopusBanner{
+      border-top: 1rpx solid #EBEBEB;
+      padding-top: 60rpx;
+      margin-bottom: 60rpx;
+      .banner{
+        width: 650rpx;
+        height: 320rpx;
+        border-radius: 10rpx;
+        .slide-image{
+          width: 650rpx;
+          height: 320rpx;
+          border-radius: 10rpx;
+        }
+      }
+    }
+  .swiper-box{
+    height: 320rpx;
+  }
+  .swiper-box .wx-swiper-dot {
+    width: 6rpx;
+    display: inline-flex;
+    height: 6rpx;
+    margin-left: -3rpx;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .swiper-box .wx-swiper-dot::before {
+    content: '';
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3rpx;
+  }
+  .swiper-box .wx-swiper-dot-active {
+    width: 12rpx;
+    background: rgba(255, 255, 255, 1);
+  }
+  .swiper-box .wx-swiper-dot-active::before {
+    background: rgba(255, 255, 255, 1);
+  }
+  .octopusTitle{
+    color: #4A4A4A;
+    font-size: 28rpx;
+    border-left:5rpx solid #ff9d2e;
+    padding-left:15rpx;
+    margin-bottom: 25rpx;
+  }
+  .flex-row{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    width:650rpx;
+    .flex-view-item{
+      width: 295rpx;
+      height: 185rpx;
+      line-height: 185rpx;
+      border-radius:8rpx;
+      margin-top: 30rpx;
+      justify-content:space-between;
+      box-shadow: -10rpx 0rpx 10rpx #f9f8fa,
+      0rpx -10rpx 20rpx #f9f8fa,
+      10rpx 0rpx 20rpx #f9f8fa,  
+      0rpx 10rpx 10rpx #f9f8fa;
+      .entranceImg{
+        width: 100rpx;
+        height: 100rpx;
+        border-radius: 20rpx;
+        margin: 40rpx 20rpx;
+        vertical-align: middle;
+      }
+      text{
+        color: #666;
+        font-size: 22rpx;
+      }
+    }
+  }
+}
+</style>
+<template>
+  <view class="octopusbox">
+    <view class="octopusBanner">
+        <view class="banner">
+          <swiper circular="true" class="swiper-box" indicator-dots="{{indicatorDots}}" autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}">
+            <swiper-item wx:for="{{indexBanners}}" wx:key="{{index}}">
+              <navigator open-type="navigate" app-id="{{item.action.navigator.appId}}" target="{{item.action.navigator.target}}" path="{{item.action.navigator.path}}" version="{{item.action.navigator.version}}">
+                <image src="{{item.imageUrl}}"   class="slide-image" @tap="handleSwiper({{index + 1}})"/>
+              </navigator>
+            </swiper-item>
+          </swiper>
+        </view>
+    </view>
+    <view class="octopusTitle">
+      成绩查询
+    </view>
+    <view class="flex-row">
+      <view class="flex-view-item" wx:for="{{passagewaylist}}" wx:key="{{index}}"  @tap="handleCadlist({{index + 1}})">
+        <navigator open-type="navigate" app-id="{{item.action.navigator.appId}}" target="{{item.action.navigator.target}}" path="{{item.action.navigator.path}}" version="{{item.action.navigator.version}}">
+          <image class="entranceImg" src="{{item.imageUrl}}"/>
+          <text>{{item.title}}</text>
+        </navigator>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '极速查成绩'
+    }
+    components = {
+
+    }
+    data = {
+      indexBanners: [],
+      passagewaylist: [],
+      indicatorDots: true,
+      autoplay: true,
+      interval: 3000,
+      duration: 1000
+    }
+    computed = {
+  
+    }
+
+    methods = {
+      handleSwiper(val) {
+        this.$parent.$wxapp.aldstat.sendEvent('banner图片点击', { ID: val + '' })
+      },
+      handleCadlist(val) {
+        this.$parent.$wxapp.aldstat.sendEvent('列表点击', { ID: val + '' })
+      }
+    }
+    iconList() {
+      const self = this
+      wepy.request({
+        url: 'https://r.sunlands.site/exam/score-query/data/bzy/icon-list.json', // 接口地址
+        method: 'GET', // get方法
+        header: {
+          'content-type': 'application/json' // 默认值
+        },
+        success: function(res) {
+          self.passagewaylist = res.data
+          self.$apply()
+        }
+      })
+    }
+    toActivity() {
+      const self = this
+      wepy.request({
+        url: 'https://r.sunlands.site/exam/score-query/data/bzy/banner-list.json', // 接口地址
+        method: 'GET', // get方法
+        header: {
+          'content-type': 'application/json' // 默认值
+        },
+        success: function(res) {
+          self.indexBanners = res.data
+          self.$apply()
+        }
+      })
+    }
+    onLoad() {
+      this.toActivity()
+      this.iconList()
+    }
+  }
+</script>
